@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.assignment.clush.todo.mapper.ToDoMapper">
+    <select id="getToDoByNo" resultType="ToDo">
+        SELECT
+            TODO_NO AS "no"
+            , USER_ID AS "userId"
+            , TITLE AS "title"
+            , CONTENT AS "content"
+            , CREATED_DATE AS "createdDate"
+            , DUE_DATE AS "dueDate"
+            , MODIFIED_DATE AS "modifiedDate"
+            , STATUS AS "status"
+            , PRIORITY AS "priority"
+        FROM
+            todo
+        WHERE
+            TODO_NO = #{toDoNo}
+    </select>
+
+    <insert id="insertToDo">
+        <selectKey keyProperty="toDo.no" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO todo
+        (USER_ID, TITLE, CONTENT, PRIORITY, CREATED_DATE, DUE_DATE)
+        VALUES
+        (#{toDo.userId}, #{toDo.title}, #{toDo.content}, #{toDo.priority}, #{toDo.createdDate}, #{toDo.dueDate})
+    </insert>
+
+    <update id="updateToDo">
+        UPDATE todo
+        SET
+            TITLE = #{toDo.title}
+            , CONTENT = #{toDo.content}
+            , STATUS = #{toDo.status}
+            , PRIORITY = #{toDo.priority}
+            , MODIFIED_DATE = #{toDo.modifiedDate}
+        WHERE TODO_NO = #{toDo.no}
+    </update>
+
+    <delete id="deleteToDo">
+        DELETE FROM todo
+        WHERE TODO_NO = #{toDoNo}
+    </delete>
+
+    <select id="countToDoByNo">
+        SELECT COUNT(*)
+        FROM todo
+        WHERE TODO_NO = #{toDoNo}
+    </select>
+
+    <select id="getToDoListByCondition" resultType="ToDoByConditionDto">
+        SELECT
+            USER_ID AS "userId"
+            , TITLE AS "title"
+            , DUE_DATE AS "dueDate"
+            , STATUS AS "status"
+            , PRIORITY AS "priority"
+        FROM
+            todo
+        <where>
+            <if test="conditionDto.userId != null">USER_ID LIKE #{conditionDto.userId}</if>
+            <if test="conditionDto.title != null">AND TITLE LIKE CONCAT('%', #{conditionDto.title}, '%')</if>
+            <if test="conditionDto.content != null">AND CONTENT LIKE CONCAT('%', #{conditionDto.content}, '%')</if>
+            <if test="conditionDto.status != null">AND STATUS LIKE CONCAT('%', #{conditionDto.status}, '%')</if>
+            <if test="conditionDto.priority > 0">AND PRIORITY = #{conditionDto.priority}</if>
+        </where>
+        ORDER BY
+            <choose>
+                <when test="conditionDto.sort == 'dueDate'">DUE_DATE</when>
+                <when test="conditionDto.sort == 'priority'">PRIORITY</when>
+                <otherwise>CREATED_DATE</otherwise>
+            </choose>
+    </select>
+</mapper>
