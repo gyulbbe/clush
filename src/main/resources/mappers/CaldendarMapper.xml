@@ -48,4 +48,10 @@
         DELETE FROM calendar
         WHERE CALENDAR_NO = #{calendarNo}
     </delete>
+
+    <select id="getSharedIdByNo" resultType="string">
+        SELECT SHARED_USER_ID
+        FROM share
+        WHERE CALENDAR_NO = #{calendarNo}
+    </select>
 </mapper>

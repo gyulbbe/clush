@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -20,16 +21,13 @@ public class CalendarService {
     }
 
     public Calendar getCalendarByNo(Integer calendarNo) {
-        if (calendarMapper.countCalendarByNo(calendarNo) == 0) {
-            throw new RestClushException("존재하지 않는 일정입니다.");
-        }
+        isExistedCalendar(calendarNo);
+        
         return calendarMapper.getCalendarByNo(calendarNo);
     }
 
     public Calendar insertCalendar(Calendar calendar) {
-        if (!DateCalculator.dateCalculate(calendar.getStartDate(), calendar.getEndDate())) {
-            throw new RestClushException("시작 날짜가 종료 날짜보다 이전이어야 합니다.");
-        }
+        compareDate(calendar);
 
         calendar.setCreatedDate(LocalDateTime.now());
         calendarMapper.insertCalendar(calendar);
@@ -37,13 +35,8 @@ public class CalendarService {
     }
 
     public Calendar updateCalendar(Calendar calendar) {
-        if (calendarMapper.countCalendarByNo(calendar.getNo()) == 0) {
-            throw new RestClushException("존재하지 않는 일정입니다.");
-        }
-
-        if (!DateCalculator.dateCalculate(calendar.getStartDate(), calendar.getEndDate())) {
-            throw new RestClushException("시작 날짜가 종료 날짜보다 이전이어야 합니다.");
-        }
+        isExistedCalendar(calendar.getNo());
+        compareDate(calendar);
 
         calendar.setModifiedDate(LocalDateTime.now());
         calendarMapper.updateCalendar(calendar);
@@ -52,5 +45,33 @@ public class CalendarService {
 
     public void deleteCalendar(Integer calendarNo) {
         calendarMapper.deleteCalendar(calendarNo);
+    }
+
+    public List<String> getSharedIdByNo(Integer calendarNo) {
+        isExistedCalendar(calendarNo);
+
+        return calendarMapper.getSharedIdByNo(calendarNo);
+    }
+
+    /**
+     * calendar가 존재하지 않을 경우 에러를 반환한다.
+     * @param calendarNo 일정 번호
+     * @return 에러
+     */
+    private void isExistedCalendar(Integer calendarNo) {
+        if (calendarMapper.countCalendarByNo(calendarNo) == 0) {
+            throw new RestClushException("존재하지 않는 일정입니다.");
+        }
+    }
+
+    /**
+     * calendar의 시작날짜와 만료날짜를 비교해서 시작날짜가 더 미래이면 에러를 반환한다.
+     * @param calendar 객체
+     * @return 에러
+     */
+    private void compareDate(Calendar calendar) {
+        if (!DateCalculator.dateCalculate(calendar.getStartDate(), calendar.getEndDate())) {
+            throw new RestClushException("시작 날짜가 종료 날짜보다 이전이어야 합니다.");
+        }
     }
 }

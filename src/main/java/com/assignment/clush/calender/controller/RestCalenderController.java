@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api")
@@ -38,5 +40,10 @@ public class RestCalenderController {
     public ResponseEntity<RestResponseDto<Void>> deleteCalendar(@PathVariable("calendarNo") Integer calendarNo) {
         calendarService.deleteCalendar(calendarNo);
         return ResponseEntity.ok(RestResponseDto.success(null, "정상적으로 일정이 삭제되었습니다."));
+    }
+
+    @GetMapping("/share/{calendarNo}")
+    public ResponseEntity<RestResponseDto<List<String>>> getShareByNo(@PathVariable("calendarNo") Integer calendarNo) {
+        return ResponseEntity.ok(RestResponseDto.success(calendarService.getSharedIdByNo(calendarNo), "정상적으로 일정에 공유된 ID목록을 불러왔습니다."));
     }
 }
