@@ -15,4 +15,6 @@ public interface CalendarMapper {
     void updateCalendar(@Param("calendar") Calendar calendar);
     void deleteCalendar(@Param("calendarNo") Integer calendarNo);
     List<String> getSharedIdByNo(@Param("calendarNo") Integer calendarNo);
+    void insertShare(@Param("calendarNo") Integer calendarNo, @Param("userId") String userId);
+    int countShareByIdAndNo(@Param("calendarNo") Integer calendarNo, @Param("userId") String userId);
 }

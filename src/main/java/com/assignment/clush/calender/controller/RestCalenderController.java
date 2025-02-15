@@ -1,5 +1,6 @@
 package com.assignment.clush.calender.controller;
 
+import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.service.CalendarService;
 import com.assignment.clush.calender.vo.Calendar;
 import com.assignment.clush.common.RestResponseDto;
@@ -45,5 +46,10 @@ public class RestCalenderController {
     @GetMapping("/share/{calendarNo}")
     public ResponseEntity<RestResponseDto<List<String>>> getShareByNo(@PathVariable("calendarNo") Integer calendarNo) {
         return ResponseEntity.ok(RestResponseDto.success(calendarService.getSharedIdByNo(calendarNo), "정상적으로 일정에 공유된 ID목록을 불러왔습니다."));
+    }
+
+    @PostMapping("/share/{calendarNo}/{userId}")
+    public ResponseEntity<RestResponseDto<ShareListDto>> insertShareList(@PathVariable("calendarNo") Integer calendarNo, @PathVariable("userId") String userId) {
+        return ResponseEntity.ok(RestResponseDto.success(calendarService.insertShare(calendarNo, userId), "정상적으로 해당 일정에 " + userId + "를 공유하였습니다."));
     }
 }

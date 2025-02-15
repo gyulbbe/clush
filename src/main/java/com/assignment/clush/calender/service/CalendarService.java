@@ -1,5 +1,6 @@
 package com.assignment.clush.calender.service;
 
+import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.mapper.CalendarMapper;
 import com.assignment.clush.calender.vo.Calendar;
 import com.assignment.clush.common.DateCalculator;
@@ -31,6 +32,7 @@ public class CalendarService {
 
         calendar.setCreatedDate(LocalDateTime.now());
         calendarMapper.insertCalendar(calendar);
+        calendarMapper.insertShare(calendar.getNo(), calendar.getUserId());
         return calendarMapper.getCalendarByNo(calendar.getNo());
     }
 
@@ -51,6 +53,17 @@ public class CalendarService {
         isExistedCalendar(calendarNo);
 
         return calendarMapper.getSharedIdByNo(calendarNo);
+    }
+
+    public ShareListDto insertShare(Integer calendarNo, String userId) {
+        if (calendarMapper.countShareByIdAndNo(calendarNo, userId) == 1) {
+            throw new RestClushException("이미 공유중인 유저입니다.");
+        }
+
+        calendarMapper.insertShare(calendarNo, userId);
+        List<String> userList = calendarMapper.getSharedIdByNo(calendarNo);
+        Calendar calendar = calendarMapper.getCalendarByNo(calendarNo);
+        return new ShareListDto(calendar, userList);
     }
 
     /**

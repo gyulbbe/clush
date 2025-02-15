@@ -54,4 +54,20 @@
         FROM share
         WHERE CALENDAR_NO = #{calendarNo}
     </select>
+
+    <insert id="insertShare">
+        INSERT INTO share
+        (CALENDAR_NO, SHARED_USER_ID)
+        VALUES
+        (#{calendarNo}, #{userId})
+    </insert>
+
+    <select id="countShareByIdAndNo">
+        SELECT EXISTS(
+            SELECT 1
+            FROM share
+            WHERE SHARED_USER_ID = #{userId}
+            AND CALENDAR_NO = #{calendarNo}
+        )
+    </select>
 </mapper>
