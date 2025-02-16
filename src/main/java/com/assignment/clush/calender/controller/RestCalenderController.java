@@ -1,9 +1,11 @@
 package com.assignment.clush.calender.controller;
 
+import com.assignment.clush.calender.dto.CalendarByRangeDto;
 import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.service.CalendarService;
 import com.assignment.clush.calender.vo.Calendar;
 import com.assignment.clush.common.RestResponseDto;
+import com.assignment.clush.common.enums.Range;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +53,10 @@ public class RestCalenderController {
     @PostMapping("/share/{calendarNo}/{userId}")
     public ResponseEntity<RestResponseDto<ShareListDto>> insertShareList(@PathVariable("calendarNo") Integer calendarNo, @PathVariable("userId") String userId) {
         return ResponseEntity.ok(RestResponseDto.success(calendarService.insertShare(calendarNo, userId), "정상적으로 해당 일정에 " + userId + "를 공유하였습니다."));
+    }
+
+    @GetMapping("/share/{userId}/{range}")
+    public ResponseEntity<RestResponseDto<List<CalendarByRangeDto>>> getShareByIdAndRange(@PathVariable("userId") String userId, @PathVariable("range") Range range) {
+        return ResponseEntity.ok(RestResponseDto.success(calendarService.getShareByIdAndRange(userId, range), "정상적으로 범위에 해당하는 공유된 일정을 불러왔습니다."));
     }
 }

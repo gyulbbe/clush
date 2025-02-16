@@ -1,6 +1,6 @@
 package com.assignment.clush.todo.vo;
 
-import com.assignment.clush.common.Status;
+import com.assignment.clush.common.enums.Status;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

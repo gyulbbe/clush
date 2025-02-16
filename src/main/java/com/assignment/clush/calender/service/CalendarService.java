@@ -1,19 +1,24 @@
 package com.assignment.clush.calender.service;
 
+import com.assignment.clush.calender.dto.CalendarByRangeDto;
 import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.mapper.CalendarMapper;
 import com.assignment.clush.calender.vo.Calendar;
 import com.assignment.clush.common.DateCalculator;
 import com.assignment.clush.common.RestClushException;
+import com.assignment.clush.common.enums.Range;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
 @Transactional
 public class CalendarService {
+
 
     private final CalendarMapper calendarMapper;
 
@@ -64,6 +69,29 @@ public class CalendarService {
         List<String> userList = calendarMapper.getSharedIdByNo(calendarNo);
         Calendar calendar = calendarMapper.getCalendarByNo(calendarNo);
         return new ShareListDto(calendar, userList);
+    }
+
+    public List<CalendarByRangeDto> getShareByIdAndRange(String userId, Range range) {
+        if (range.equals(Range.DAY)) {
+            return calendarMapper.getShareOneDayByIdAndRange(userId, LocalDate.now());
+        } else if (range.equals(Range.WEEK)) {
+            int dayOfWeek = LocalDate.now().getDayOfWeek().getValue();
+            LocalDate firstDate = LocalDate.now().minusDays(dayOfWeek); // 이번 주 첫째 날
+            LocalDate lastDate = firstDate.plusDays(6); // 이번 주 마지막 날
+            List<CalendarByRangeDto> dtoList = calendarMapper.getShareOneWeekByIdAndRange(userId, firstDate, lastDate);
+            if (dtoList.isEmpty()) {
+                throw new RestClushException("요청하신 범위에 해당하는 일정이 존재하지 않습니다.");
+            }
+            return dtoList;
+        } else {
+            LocalDate firstDate = LocalDate.now().withDayOfMonth(1); // 이번 달 첫째 날
+            LocalDate lastDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()); // 이번 달 마지막 날
+            List<CalendarByRangeDto> dtoList = calendarMapper.getShareOneWeekByIdAndRange(userId, firstDate, lastDate);
+            if (dtoList.isEmpty()) {
+                throw new RestClushException("요청하신 범위에 해당하는 일정이 존재하지 않습니다.");
+            }
+            return dtoList;
+        }
     }
 
     /**

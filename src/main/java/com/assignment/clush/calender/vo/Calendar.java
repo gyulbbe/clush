@@ -1,6 +1,6 @@
 package com.assignment.clush.calender.vo;
 
-import com.assignment.clush.common.Repeat;
+import com.assignment.clush.common.enums.Repeat;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

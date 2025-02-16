@@ -1,6 +1,6 @@
 package com.assignment.clush.todo.dto;
 
-import com.assignment.clush.common.Status;
+import com.assignment.clush.common.enums.Status;
 import lombok.*;
 import org.apache.ibatis.type.Alias;
 import org.springframework.format.annotation.DateTimeFormat;

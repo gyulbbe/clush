@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.assignment.clush.calender.mapper.CalendarMapper">
+    <select id="getCalendarByNo" resultType="Calendar">
+        SELECT
+            CALENDAR_NO AS "no"
+            , USER_ID AS "userId"
+            , TITLE AS "title"
+            , CONTENT AS "content"
+            , START_DATE AS "startDate"
+            , END_DATE AS "endDate"
+            , CREATED_DATE AS "createdDate"
+            , MODIFIED_DATE AS "modifiedDate"
+        FROM
+            calendar
+        WHERE
+            CALENDAR_NO = #{calendarNo}
+    </select>
+
+    <select id="countCalendarByNo" resultType="int">
+        SELECT COUNT(*)
+        FROM calendar
+        WHERE CALENDAR_NO = #{calendarNo}
+    </select>
+
+    <insert id="insertCalendar">
+        <selectKey keyProperty="calendar.no" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO calendar
+        (USER_ID, TITLE, CONTENT, START_DATE, END_DATE, CREATED_DATE)
+        VALUES
+        (#{calendar.userId}, #{calendar.title}, #{calendar.content}, #{calendar.startDate}, #{calendar.endDate}, #{calendar.createdDate})
+    </insert>
+
+    <update id="updateCalendar">
+        UPDATE calendar
+        SET
+            TITLE = #{calendar.title}
+            , CONTENT = #{calendar.content}
+            , START_DATE = #{calendar.startDate}
+            , END_DATE = #{calendar.endDate}
+            , MODIFIED_DATE = #{calendar.modifiedDate}
+        WHERE CALENDAR_NO = #{calendar.no}
+    </update>
+
+    <delete id="deleteCalendar">
+        DELETE FROM calendar
+        WHERE CALENDAR_NO = #{calendarNo}
+    </delete>
+
+    <select id="getSharedIdByNo" resultType="string">
+        SELECT SHARED_USER_ID
+        FROM share
+        WHERE CALENDAR_NO = #{calendarNo}
+    </select>
+
+    <insert id="insertShare">
+        INSERT INTO share
+        (CALENDAR_NO, SHARED_USER_ID)
+        VALUES
+        (#{calendarNo}, #{userId})
+    </insert>
+
+    <select id="countShareByIdAndNo">
+        SELECT EXISTS(
+            SELECT 1
+            FROM share
+            WHERE SHARED_USER_ID = #{userId}
+            AND CALENDAR_NO = #{calendarNo}
+        )
+    </select>
+
+    <select id="getShareOneDayByIdAndRange" resultType="CalendarByRangeDto">
+        <!-- 오늘이 START_DATE 와 END_DATE 사이에 껴 있는 경우 -->
+        SELECT
+            C.TITLE AS "title"
+            , C.START_DATE AS "startDate"
+            , C.END_DATE AS "endDate"
+            , C.REPEAT AS "repeat"
+        FROM
+            calendar C
+        INNER JOIN
+            share S
+        ON
+            C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+            S.SHARED_USER_ID = #{userId}
+        AND
+            DATE(#{now}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
+        AND
+            C.REPEAT IS NULL
+
+        UNION ALL
+
+        <!-- REPEAT이 DAY인 경우 -->
+        SELECT
+            C.TITLE AS "title"
+            , C.START_DATE AS "startDate"
+            , C.END_DATE AS "endDate"
+            , C.REPEAT AS "repeat"
+        FROM
+            calendar C
+        INNER JOIN
+            share S
+        ON
+            C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+            S.SHARED_USER_ID = #{userId}
+        AND
+            C.REPEAT = 'DAY'
+
+        UNION ALL
+
+        <!-- REPEAT이 WEEK인 경우 -->
+        SELECT
+            C.TITLE AS "title"
+            , C.START_DATE AS "startDate"
+            , C.END_DATE AS "endDate"
+            , C.REPEAT AS "repeat"
+        FROM
+            calendar C
+        INNER JOIN
+            share S
+        ON
+            C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+            S.SHARED_USER_ID = #{userId}
+        AND
+            C.REPEAT = 'WEEK'
+        AND
+            MOD(DAYOFWEEK(#{now}) - DAYOFWEEK(C.START_DATE) + 7, 7)
+            &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
+
+        UNION ALL
+
+        <!-- REPEAT이 MONTH인 경우 -->
+        SELECT
+            C.TITLE AS "title"
+            , C.START_DATE AS "startDate"
+            , C.END_DATE AS "endDate"
+            , C.REPEAT AS "repeat"
+        FROM
+            calendar C
+        INNER JOIN
+            share S
+        ON
+            C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+            S.SHARED_USER_ID = #{userId}
+        AND
+            C.REPEAT = 'MONTH'
+        AND
+        (CASE
+            WHEN DATE_FORMAT(C.START_DATE, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
+            THEN DATE_FORMAT(#{now}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
+            ELSE DATE_FORMAT(#{now}, '%m%d') &gt;= DATE_FORMAT(C.START_DATE, '%m%d') OR DATE_FORMAT(#{now}, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
+        END)
+        UNION ALL
+        <!-- REPEAT이 YEAR인 경우 -->
+        SELECT
+            C.TITLE AS "title"
+            , C.START_DATE AS "startDate"
+            , C.END_DATE AS "endDate"
+            , C.REPEAT AS "repeat"
+        FROM
+            calendar C
+        INNER JOIN
+            share S
+        ON
+            C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+            S.SHARED_USER_ID = #{userId}
+        AND
+            C.REPEAT = 'YEAR'
+        AND
+            DATE_FORMAT(#{now}, '%m%d')
+        BETWEEN
+            DATE_FORMAT(C.START_DATE, '%m%d')
+        AND
+            DATE_FORMAT(C.END_DATE, '%m%d')
+    </select>
+
+    <select id="getShareOneWeekByIdAndRange" resultType="CalendarByRangeDto">
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        (DATE(C.START_DATE) BETWEEN DATE(#{firstDate}) AND DATE(#{lastDate})
+        OR DATE(C.END_DATE) BETWEEN DATE(#{firstDate}) AND DATE(#{lastDate})
+        OR DATE(#{firstDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
+        OR DATE(#{lastDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE))
+        AND
+        C.REPEAT IS NULL
+
+        UNION ALL
+
+        <!-- REPEAT이 DAY인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'DAY'
+
+        UNION ALL
+
+        <!-- REPEAT이 WEEK인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'WEEK'
+        AND
+        (MOD(DAYOFWEEK(#{firstDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        OR
+        MOD(DAYOFWEEK(#{lastDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7))
+
+        UNION ALL
+
+        <!-- REPEAT이 MONTH인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'MONTH'
+        AND
+        (CASE
+        WHEN DATE_FORMAT(C.START_DATE, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
+        THEN
+        (DATE_FORMAT(#{firstDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
+        OR DATE_FORMAT(#{lastDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d'))
+        ELSE
+        (DATE_FORMAT(#{firstDate}, '%m%d') &gt;= DATE_FORMAT(C.START_DATE, '%m%d')
+        OR DATE_FORMAT(#{firstDate}, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
+        OR DATE_FORMAT(#{lastDate}, '%m%d') &gt;= DATE_FORMAT(C.START_DATE, '%m%d')
+        OR DATE_FORMAT(#{lastDate}, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d'))
+        END)
+
+        UNION ALL
+
+        <!-- REPEAT이 YEAR인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'YEAR'
+        AND
+        (DATE_FORMAT(#{firstDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
+        OR DATE_FORMAT(#{lastDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d'))
+    </select>
+
+    <select id="getShareOneMonthByIdAndRange" resultType="CalendarByRangeDto">
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        (DATE(C.START_DATE) BETWEEN DATE(#{firstDate}) AND DATE(#{lastDate})
+        OR DATE(C.END_DATE) BETWEEN DATE(#{firstDate}) AND DATE(#{lastDate})
+        OR DATE(#{firstDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
+        OR DATE(#{lastDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE))
+        AND
+        C.REPEAT IS NULL
+
+        UNION ALL
+
+        <!-- REPEAT이 DAY인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'DAY'
+
+        UNION ALL
+
+        <!-- REPEAT이 WEEK인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'WEEK'
+        AND
+        (MOD(DAYOFWEEK(#{firstDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        OR
+        MOD(DAYOFWEEK(#{lastDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
+        &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7))
+
+        UNION ALL
+
+        <!-- REPEAT이 MONTH인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'MONTH'
+        AND
+        (DATE_FORMAT(C.START_DATE, '%d') BETWEEN DATE_FORMAT(#{firstDate}, '%d') AND DATE_FORMAT(#{lastDate}, '%d')
+        OR DATE_FORMAT(C.END_DATE, '%d') BETWEEN DATE_FORMAT(#{firstDate}, '%d') AND DATE_FORMAT(#{lastDate}, '%d')
+        OR DATE_FORMAT(#{firstDate}, '%d') BETWEEN DATE_FORMAT(C.START_DATE, '%d') AND DATE_FORMAT(C.END_DATE, '%d')
+        OR DATE_FORMAT(#{lastDate}, '%d') BETWEEN DATE_FORMAT(C.START_DATE, '%d') AND DATE_FORMAT(C.END_DATE, '%d'))
+
+        UNION ALL
+
+        <!-- REPEAT이 YEAR인 경우 -->
+        SELECT
+        TITLE AS "title",
+        START_DATE AS "startDate",
+        END_DATE AS "endDate"
+        FROM
+        calendar C
+        INNER JOIN
+        share S
+        ON
+        C.CALENDAR_NO = S.CALENDAR_NO
+        WHERE
+        S.SHARED_USER_ID = #{userId}
+        AND
+        C.REPEAT = 'YEAR'
+        AND
+        (DATE_FORMAT(#{firstDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
+        OR DATE_FORMAT(#{lastDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d'))
+    </select>
+</mapper>
