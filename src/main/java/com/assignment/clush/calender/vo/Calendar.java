@@ -1,6 +1,7 @@
 package com.assignment.clush.calender.vo;
 
 import com.assignment.clush.common.enums.Repeat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,25 +16,43 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Alias("Calendar")
+@Schema(description = "일정")
 public class Calendar {
+    @Schema(description = "일정 테이블 pk", example = "5")
     private Integer no;
+
     @NotBlank(message = "id를 입력하세요.")
+    @Schema(description = "아이디", example = "clush1", requiredMode = Schema.RequiredMode.REQUIRED)
     private String userId;
+
     @NotBlank(message = "제목을 입력하세요.")
+    @Schema(description = "제목", example = "clush title1", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
+
     @NotBlank(message = "내용을 입력하세요.")
+    @Schema(description = "내용", example = "clush content1", requiredMode = Schema.RequiredMode.REQUIRED)
     private String content;
+
     @NotNull(message = "시작일을 입력하세요.")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @FutureOrPresent(message = "지나간 날짜를 입력할 수 없습니다.")
+    @Schema(description = "일정 시작일", example = "2025-02-21 14:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime startDate;
+
     @NotNull(message = "종료일을 입력하세요.")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @FutureOrPresent(message = "지나간 날짜를 입력할 수 없습니다.")
+    @Schema(description = "일정 종료일", example = "2025-02-22 14:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime endDate;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "생성일", example = "2025-02-19 14:00:00")
     private LocalDateTime createdDate;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "수정일", example = "2025-02-20 14:00:00")
     private LocalDateTime modifiedDate;
+
+    @Schema(description = "반복 주기", example = "WEEK", allowableValues = "DAY, WEEK, MONTH, YEAR")
     private Repeat repeat;
 }
