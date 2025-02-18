@@ -1,4 +1,4 @@
-package com.assignment.clush.todo.vo;
+package com.assignment.clush.todo.dto;
 
 import com.assignment.clush.common.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,15 +19,11 @@ import java.util.Objects;
 @Setter
 @ToString
 @Builder
-@Alias("ToDo")
-@Schema(description = "할 일")
-public class ToDo {
+@Alias("UpdateForm")
+@Schema(description = "할 일 업데이트 폼")
+public class UpdateForm {
     @Schema(description = "할 일 pk", example = "5")
     private Integer no;
-
-    @NotBlank(message = "id를 입력하세요.")
-    @Schema(description = "유저 아이디", example = "clush5", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String userId;
 
     @NotBlank(message = "제목을 입력하세요.")
     @Schema(description = "제목", example = "clush title5", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -65,9 +61,8 @@ public class ToDo {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
-        ToDo other = (ToDo) obj;
-        return userId.equals(other.userId)
-                && title.equals(other.title)
+        UpdateForm other = (UpdateForm) obj;
+        return title.equals(other.title)
                 && content.equals(other.content)
                 && status.equals(other.status)
                 && priority == other.priority;
@@ -75,6 +70,6 @@ public class ToDo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, title, content, status, priority);
+        return Objects.hash(title, content, status, priority);
     }
 }

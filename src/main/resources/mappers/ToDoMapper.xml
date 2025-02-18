@@ -31,12 +31,13 @@
     <update id="updateToDo">
         UPDATE todo
         SET
-            TITLE = #{toDo.title}
-            , CONTENT = #{toDo.content}
-            , STATUS = #{toDo.status}
-            , PRIORITY = #{toDo.priority}
-            , MODIFIED_DATE = #{toDo.modifiedDate}
-        WHERE TODO_NO = #{toDo.no}
+            TITLE = #{updateForm.title}
+            , CONTENT = #{updateForm.content}
+            , STATUS = #{updateForm.status}
+            , PRIORITY = #{updateForm.priority}
+            , MODIFIED_DATE = #{updateForm.modifiedDate}
+            , DUE_DATE = #{updateForm.dueDate}
+        WHERE TODO_NO = #{updateForm.no}
     </update>
 
     <delete id="deleteToDo">

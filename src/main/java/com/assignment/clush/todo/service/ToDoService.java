@@ -4,6 +4,7 @@ import com.assignment.clush.common.DateCalculator;
 import com.assignment.clush.common.RestClushException;
 import com.assignment.clush.todo.dto.ConditionDto;
 import com.assignment.clush.todo.dto.ToDoByConditionDto;
+import com.assignment.clush.todo.dto.UpdateForm;
 import com.assignment.clush.todo.mapper.ToDoMapper;
 import com.assignment.clush.todo.vo.ToDo;
 import lombok.extern.slf4j.Slf4j;
@@ -37,17 +38,23 @@ public class ToDoService {
         return toDoMapper.getToDoByNo(toDo.getNo());
     }
 
-    public ToDo updateToDo(ToDo toDo) {
-        isNotExisted(toDo.getNo());
-        compareDate(LocalDateTime.now(), toDo.getDueDate());
-        ToDo prevToDo = getToDoByNo(toDo.getNo());
-        if (prevToDo.equals(toDo)) {
-            throw new RestClushException("수정된 부분이 존재하지 않습니다.");
-        }
+    public ToDo updateToDo(UpdateForm updateForm) {
+        int no = updateForm.getNo();
+        isNotExisted(no);
+        compareDate(LocalDateTime.now(), updateForm.getDueDate());
+        ToDo prevToDo = getToDoByNo(no);
+        UpdateForm prevUpdateForm = UpdateForm.builder()
+                .no(no)
+                .title(prevToDo.getTitle())
+                .content(prevToDo.getContent())
+                .status(prevToDo.getStatus())
+                .priority(prevToDo.getPriority())
+                .build();
+        if (updateForm.equals(prevUpdateForm)) throw new RestClushException("수정된 부분이 존재하지 않습니다.");
 
-        toDo.setModifiedDate(LocalDateTime.now());
-        toDoMapper.updateToDo(toDo);
-        return toDoMapper.getToDoByNo(toDo.getNo());
+        updateForm.setModifiedDate(LocalDateTime.now());
+        toDoMapper.updateToDo(updateForm);
+        return toDoMapper.getToDoByNo(no);
     }
 
     public void deleteToDo(Integer toDoNo) {
