@@ -64,7 +64,7 @@ public class ToDoUpdateForm {
         ToDoUpdateForm other = (ToDoUpdateForm) obj;
         return title.equals(other.title)
                 && content.equals(other.content)
-                && status.equals(other.status)
+                && Objects.equals(status, other.status)
                 && priority == other.priority;
     }
 
