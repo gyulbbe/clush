@@ -56,7 +56,7 @@ public class ToDo {
     @NotNull(message = "우선순위를 입력하세요.")
     @Range(min=1, max=3, message = "우선순위 범위는 1부터 3까지입니다.")
     @Schema(description = "우선순위", example = "3", requiredMode = Schema.RequiredMode.REQUIRED)
-    private int priority;
+    private Integer priority;
 
     @Override
     public boolean equals(Object obj) {
