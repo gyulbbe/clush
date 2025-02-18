@@ -3,6 +3,7 @@ package com.assignment.clush.todo.controller;
 import com.assignment.clush.common.RestResponseDto;
 import com.assignment.clush.todo.dto.ConditionDto;
 import com.assignment.clush.todo.dto.ToDoByConditionDto;
+import com.assignment.clush.todo.dto.UpdateForm;
 import com.assignment.clush.todo.service.ToDoService;
 import com.assignment.clush.todo.vo.ToDo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,8 +46,8 @@ public class RestToDoController {
 
     @Operation(summary = "할 일 수정")
     @PutMapping("/toDo")
-    public ResponseEntity<RestResponseDto<ToDo>> updateToDo(@Valid @ModelAttribute ToDo toDo) {
-        return ResponseEntity.ok(RestResponseDto.success(toDoService.updateToDo(toDo), "정상적으로 할 일이 수정되었습니다."));
+    public ResponseEntity<RestResponseDto<ToDo>> updateToDo(@Valid @ModelAttribute UpdateForm updateForm) {
+        return ResponseEntity.ok(RestResponseDto.success(toDoService.updateToDo(updateForm), "정상적으로 할 일이 수정되었습니다."));
     }
 
     @Operation(summary = "할 일 삭제")
@@ -58,7 +59,7 @@ public class RestToDoController {
 
     @Operation(summary = "할 일 리스트 조회", description = "조건에 따라 검색과 정렬을 하여 할 일 리스트를 불러옵니다.")
     @GetMapping("/toDo")
-    public List<ToDoByConditionDto> getToDoListByCondition(@ModelAttribute ConditionDto conditionDto) {
-        return toDoService.getToDoListByCondition(conditionDto);
+    public ResponseEntity<RestResponseDto<List<ToDoByConditionDto>>> getToDoListByCondition(@ModelAttribute ConditionDto conditionDto) {
+        return ResponseEntity.ok(RestResponseDto.success(toDoService.getToDoListByCondition(conditionDto), "정상적으로 리스트를 불러왔습니다."));
     }
 }
