@@ -3,7 +3,7 @@ package com.assignment.clush.todo.controller;
 import com.assignment.clush.common.RestResponseDto;
 import com.assignment.clush.todo.dto.ConditionDto;
 import com.assignment.clush.todo.dto.ToDoByConditionDto;
-import com.assignment.clush.todo.dto.UpdateForm;
+import com.assignment.clush.todo.dto.ToDoUpdateForm;
 import com.assignment.clush.todo.service.ToDoService;
 import com.assignment.clush.todo.vo.ToDo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +46,7 @@ public class RestToDoController {
 
     @Operation(summary = "할 일 수정")
     @PutMapping("/toDo")
-    public ResponseEntity<RestResponseDto<ToDo>> updateToDo(@Valid @ModelAttribute UpdateForm updateForm) {
+    public ResponseEntity<RestResponseDto<ToDo>> updateToDo(@Valid @ModelAttribute ToDoUpdateForm updateForm) {
         return ResponseEntity.ok(RestResponseDto.success(toDoService.updateToDo(updateForm), "정상적으로 할 일이 수정되었습니다."));
     }
 

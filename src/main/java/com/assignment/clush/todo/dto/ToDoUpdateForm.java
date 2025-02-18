@@ -21,7 +21,7 @@ import java.util.Objects;
 @Builder
 @Alias("UpdateForm")
 @Schema(description = "할 일 업데이트 폼")
-public class UpdateForm {
+public class ToDoUpdateForm {
     @Schema(description = "할 일 pk", example = "5")
     private Integer no;
 
@@ -61,7 +61,7 @@ public class UpdateForm {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
-        UpdateForm other = (UpdateForm) obj;
+        ToDoUpdateForm other = (ToDoUpdateForm) obj;
         return title.equals(other.title)
                 && content.equals(other.content)
                 && status.equals(other.status)

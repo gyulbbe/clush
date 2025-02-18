@@ -11,6 +11,7 @@
             , END_DATE AS "endDate"
             , CREATED_DATE AS "createdDate"
             , MODIFIED_DATE AS "modifiedDate"
+            , REPEATS AS "repeats"
         FROM
             calendar
         WHERE
@@ -28,20 +29,21 @@
             SELECT LAST_INSERT_ID()
         </selectKey>
         INSERT INTO calendar
-        (USER_ID, TITLE, CONTENT, START_DATE, END_DATE, CREATED_DATE)
+        (USER_ID, TITLE, CONTENT, START_DATE, END_DATE, CREATED_DATE, REPEATS)
         VALUES
-        (#{calendar.userId}, #{calendar.title}, #{calendar.content}, #{calendar.startDate}, #{calendar.endDate}, #{calendar.createdDate})
+        (#{calendar.userId}, #{calendar.title}, #{calendar.content}, #{calendar.startDate}, #{calendar.endDate}, #{calendar.createdDate}, #{calendar.repeats})
     </insert>
 
     <update id="updateCalendar">
         UPDATE calendar
         SET
-            TITLE = #{calendar.title}
-            , CONTENT = #{calendar.content}
-            , START_DATE = #{calendar.startDate}
-            , END_DATE = #{calendar.endDate}
-            , MODIFIED_DATE = #{calendar.modifiedDate}
-        WHERE CALENDAR_NO = #{calendar.no}
+            TITLE = #{calendarUpdateForm.title}
+            , CONTENT = #{calendarUpdateForm.content}
+            , START_DATE = #{calendarUpdateForm.startDate}
+            , END_DATE = #{calendarUpdateForm.endDate}
+            , MODIFIED_DATE = #{calendarUpdateForm.modifiedDate}
+            , REPEATS = #{calendarUpdateForm.repeats}
+        WHERE CALENDAR_NO = #{calendarUpdateForm.no}
     </update>
 
     <delete id="deleteCalendar">
@@ -77,7 +79,7 @@
             C.TITLE AS "title"
             , C.START_DATE AS "startDate"
             , C.END_DATE AS "endDate"
-            , C.REPEAT AS "repeat"
+            , C.REPEATS AS "repeats"
         FROM
             calendar C
         INNER JOIN
@@ -89,16 +91,16 @@
         AND
             DATE(#{now}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
         AND
-            C.REPEAT IS NULL
+            C.REPEATS IS NULL
 
         UNION ALL
 
-        <!-- REPEAT이 DAY인 경우 -->
+        <!-- REPEATS이 DAY인 경우 -->
         SELECT
             C.TITLE AS "title"
             , C.START_DATE AS "startDate"
             , C.END_DATE AS "endDate"
-            , C.REPEAT AS "repeat"
+            , C.REPEATS AS "repeats"
         FROM
             calendar C
         INNER JOIN
@@ -108,16 +110,16 @@
         WHERE
             S.SHARED_USER_ID = #{userId}
         AND
-            C.REPEAT = 'DAY'
+            C.REPEATS = 'DAY'
 
         UNION ALL
 
-        <!-- REPEAT이 WEEK인 경우 -->
+        <!-- REPEATS이 WEEK인 경우 -->
         SELECT
             C.TITLE AS "title"
             , C.START_DATE AS "startDate"
             , C.END_DATE AS "endDate"
-            , C.REPEAT AS "repeat"
+            , C.REPEATS AS "repeats"
         FROM
             calendar C
         INNER JOIN
@@ -127,19 +129,19 @@
         WHERE
             S.SHARED_USER_ID = #{userId}
         AND
-            C.REPEAT = 'WEEK'
+            C.REPEATS = 'WEEK'
         AND
             MOD(DAYOFWEEK(#{now}) - DAYOFWEEK(C.START_DATE) + 7, 7)
             &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
 
         UNION ALL
 
-        <!-- REPEAT이 MONTH인 경우 -->
+        <!-- REPEATS이 MONTH인 경우 -->
         SELECT
             C.TITLE AS "title"
             , C.START_DATE AS "startDate"
             , C.END_DATE AS "endDate"
-            , C.REPEAT AS "repeat"
+            , C.REPEATS AS "repeats"
         FROM
             calendar C
         INNER JOIN
@@ -149,7 +151,7 @@
         WHERE
             S.SHARED_USER_ID = #{userId}
         AND
-            C.REPEAT = 'MONTH'
+            C.REPEATS = 'MONTH'
         AND
         (CASE
             WHEN DATE_FORMAT(C.START_DATE, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
@@ -157,12 +159,12 @@
             ELSE DATE_FORMAT(#{now}, '%m%d') &gt;= DATE_FORMAT(C.START_DATE, '%m%d') OR DATE_FORMAT(#{now}, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
         END)
         UNION ALL
-        <!-- REPEAT이 YEAR인 경우 -->
+        <!-- REPEATS이 YEAR인 경우 -->
         SELECT
             C.TITLE AS "title"
             , C.START_DATE AS "startDate"
             , C.END_DATE AS "endDate"
-            , C.REPEAT AS "repeat"
+            , C.REPEATS AS "repeats"
         FROM
             calendar C
         INNER JOIN
@@ -172,7 +174,7 @@
         WHERE
             S.SHARED_USER_ID = #{userId}
         AND
-            C.REPEAT = 'YEAR'
+            C.REPEATS = 'YEAR'
         AND
             DATE_FORMAT(#{now}, '%m%d')
         BETWEEN
@@ -186,7 +188,7 @@
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -201,16 +203,16 @@
         OR DATE(#{firstDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
         OR DATE(#{lastDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE))
         AND
-        C.REPEAT IS NULL
+        C.REPEATS IS NULL
 
         UNION ALL
 
-        <!-- REPEAT이 DAY인 경우 -->
+        <!-- REPEATS이 DAY인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -220,16 +222,16 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'DAY'
+        C.REPEATS = 'DAY'
 
         UNION ALL
 
-        <!-- REPEAT이 WEEK인 경우 -->
+        <!-- REPEATS이 WEEK인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -239,7 +241,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'WEEK'
+        C.REPEATS = 'WEEK'
         AND
         (MOD(DAYOFWEEK(#{firstDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
         &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
@@ -249,12 +251,12 @@
 
         UNION ALL
 
-        <!-- REPEAT이 MONTH인 경우 -->
+        <!-- REPEATS이 MONTH인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -264,7 +266,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'MONTH'
+        C.REPEATS = 'MONTH'
         AND
         (CASE
         WHEN DATE_FORMAT(C.START_DATE, '%m%d') &lt;= DATE_FORMAT(C.END_DATE, '%m%d')
@@ -280,12 +282,12 @@
 
         UNION ALL
 
-        <!-- REPEAT이 YEAR인 경우 -->
+        <!-- REPEATS이 YEAR인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -295,7 +297,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'YEAR'
+        C.REPEATS = 'YEAR'
         AND
         (DATE_FORMAT(#{firstDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
         OR DATE_FORMAT(#{lastDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d'))
@@ -306,7 +308,7 @@
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -321,16 +323,16 @@
         OR DATE(#{firstDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE)
         OR DATE(#{lastDate}) BETWEEN DATE(C.START_DATE) AND DATE(C.END_DATE))
         AND
-        C.REPEAT IS NULL
+        C.REPEATS IS NULL
 
         UNION ALL
 
-        <!-- REPEAT이 DAY인 경우 -->
+        <!-- REPEATS이 DAY인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -340,16 +342,16 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'DAY'
+        C.REPEATS = 'DAY'
 
         UNION ALL
 
-        <!-- REPEAT이 WEEK인 경우 -->
+        <!-- REPEATS이 WEEK인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -359,7 +361,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'WEEK'
+        C.REPEATS = 'WEEK'
         AND
         (MOD(DAYOFWEEK(#{firstDate}) - DAYOFWEEK(C.START_DATE) + 7, 7)
         &lt;= MOD(DAYOFWEEK(C.END_DATE) - DAYOFWEEK(C.START_DATE) + 7, 7)
@@ -369,12 +371,12 @@
 
         UNION ALL
 
-        <!-- REPEAT이 MONTH인 경우 -->
+        <!-- REPEATS이 MONTH인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -384,7 +386,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'MONTH'
+        C.REPEATS = 'MONTH'
         AND
         (DATE_FORMAT(C.START_DATE, '%d') BETWEEN DATE_FORMAT(#{firstDate}, '%d') AND DATE_FORMAT(#{lastDate}, '%d')
         OR DATE_FORMAT(C.END_DATE, '%d') BETWEEN DATE_FORMAT(#{firstDate}, '%d') AND DATE_FORMAT(#{lastDate}, '%d')
@@ -393,12 +395,12 @@
 
         UNION ALL
 
-        <!-- REPEAT이 YEAR인 경우 -->
+        <!-- REPEATS이 YEAR인 경우 -->
         SELECT
         C.TITLE AS "title"
         , C.START_DATE AS "startDate"
         , C.END_DATE AS "endDate"
-        , C.REPEAT AS "repeat"
+        , C.REPEATS AS "repeats"
         FROM
         calendar C
         INNER JOIN
@@ -408,7 +410,7 @@
         WHERE
         S.SHARED_USER_ID = #{userId}
         AND
-        C.REPEAT = 'YEAR'
+        C.REPEATS = 'YEAR'
         AND
         (DATE_FORMAT(#{firstDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d')
         OR DATE_FORMAT(#{lastDate}, '%m%d') BETWEEN DATE_FORMAT(C.START_DATE, '%m%d') AND DATE_FORMAT(C.END_DATE, '%m%d'))

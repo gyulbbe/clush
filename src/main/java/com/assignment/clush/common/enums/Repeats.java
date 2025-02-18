@@ -1,5 +1,5 @@
 package com.assignment.clush.common.enums;
 
-public enum Repeat {
+public enum Repeats {
     DAY, WEEK, MONTH, YEAR
 }

@@ -1,6 +1,6 @@
 package com.assignment.clush.calender.dto;
 
-import com.assignment.clush.common.enums.Repeat;
+import com.assignment.clush.common.enums.Repeats;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +30,5 @@ public class CalendarByRangeDto {
     private LocalDateTime endDate;
 
     @Schema(description = "반복 주기", example = "WEEK", allowableValues = "DAY, WEEK, MONTH, YEAR")
-    private Repeat repeat;
+    private Repeats repeats;
 }

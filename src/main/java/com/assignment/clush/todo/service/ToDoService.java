@@ -4,7 +4,7 @@ import com.assignment.clush.common.DateCalculator;
 import com.assignment.clush.common.RestClushException;
 import com.assignment.clush.todo.dto.ConditionDto;
 import com.assignment.clush.todo.dto.ToDoByConditionDto;
-import com.assignment.clush.todo.dto.UpdateForm;
+import com.assignment.clush.todo.dto.ToDoUpdateForm;
 import com.assignment.clush.todo.mapper.ToDoMapper;
 import com.assignment.clush.todo.vo.ToDo;
 import lombok.extern.slf4j.Slf4j;
@@ -38,12 +38,12 @@ public class ToDoService {
         return toDoMapper.getToDoByNo(toDo.getNo());
     }
 
-    public ToDo updateToDo(UpdateForm updateForm) {
+    public ToDo updateToDo(ToDoUpdateForm updateForm) {
         int no = updateForm.getNo();
         isNotExisted(no);
         compareDate(LocalDateTime.now(), updateForm.getDueDate());
         ToDo prevToDo = getToDoByNo(no);
-        UpdateForm prevUpdateForm = UpdateForm.builder()
+        ToDoUpdateForm prevUpdateForm = ToDoUpdateForm.builder()
                 .no(no)
                 .title(prevToDo.getTitle())
                 .content(prevToDo.getContent())

@@ -1,4 +1,4 @@
-package com.assignment.clush.calender.vo;
+package com.assignment.clush.calender.dto;
 
 import com.assignment.clush.common.enums.Repeats;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,20 +10,19 @@ import org.apache.ibatis.type.Alias;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
-@Alias("Calendar")
-@Schema(description = "일정")
-public class Calendar {
+@Builder
+@Alias("CalendarUpdateForm")
+@Schema(description = "일정 수정 폼")
+public class CalendarUpdateForm {
     @Schema(description = "일정 테이블 pk", example = "5")
     private Integer no;
-
-    @NotBlank(message = "id를 입력하세요.")
-    @Schema(description = "아이디", example = "clush1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String userId;
 
     @NotBlank(message = "제목을 입력하세요.")
     @Schema(description = "제목", example = "clush title1", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -55,4 +54,22 @@ public class Calendar {
 
     @Schema(description = "반복 주기", example = "WEEK", allowableValues = "DAY, WEEK, MONTH, YEAR")
     private Repeats repeats;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        CalendarUpdateForm other = (CalendarUpdateForm) obj;
+        return title.equals(other.title)
+                && content.equals(other.content)
+                && startDate.equals(other.startDate)
+                && endDate.equals(other.endDate)
+                && Objects.equals(repeats, other.repeats);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, content, startDate, endDate, repeats);
+    }
 }

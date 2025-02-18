@@ -1,6 +1,7 @@
 package com.assignment.clush.calender.mapper;
 
 import com.assignment.clush.calender.dto.CalendarByRangeDto;
+import com.assignment.clush.calender.dto.CalendarUpdateForm;
 import com.assignment.clush.calender.vo.Calendar;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -13,7 +14,7 @@ public interface CalendarMapper {
     Calendar getCalendarByNo(@Param("calendarNo") Integer calendarNo);
     int countCalendarByNo(@Param("calendarNo") Integer calendarNo);
     void insertCalendar(@Param("calendar") Calendar calendar);
-    void updateCalendar(@Param("calendar") Calendar calendar);
+    void updateCalendar(@Param("calendarUpdateForm") CalendarUpdateForm calendarUpdateForm);
     void deleteCalendar(@Param("calendarNo") Integer calendarNo);
     List<String> getSharedIdByNo(@Param("calendarNo") Integer calendarNo);
     void insertShare(@Param("calendarNo") Integer calendarNo, @Param("userId") String userId);

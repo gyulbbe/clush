@@ -1,6 +1,7 @@
 package com.assignment.clush.calender.controller;
 
 import com.assignment.clush.calender.dto.CalendarByRangeDto;
+import com.assignment.clush.calender.dto.CalendarUpdateForm;
 import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.service.CalendarService;
 import com.assignment.clush.calender.vo.Calendar;
@@ -42,8 +43,8 @@ public class RestCalenderController {
 
     @Operation(summary = "일정 수정")
     @PutMapping("/calendar")
-    public ResponseEntity<RestResponseDto<Calendar>> updateCalendar(@Valid @ModelAttribute Calendar calendar) {
-        return ResponseEntity.ok(RestResponseDto.success(calendarService.updateCalendar(calendar), "정상적으로 일정이 수정되었습니다."));
+    public ResponseEntity<RestResponseDto<Calendar>> updateCalendar(@Valid @ModelAttribute CalendarUpdateForm calendarUpdateForm) {
+        return ResponseEntity.ok(RestResponseDto.success(calendarService.updateCalendar(calendarUpdateForm), "정상적으로 일정이 수정되었습니다."));
     }
 
     @Operation(summary = "일정 삭제")

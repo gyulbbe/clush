@@ -1,6 +1,7 @@
 package com.assignment.clush.calender.service;
 
 import com.assignment.clush.calender.dto.CalendarByRangeDto;
+import com.assignment.clush.calender.dto.CalendarUpdateForm;
 import com.assignment.clush.calender.dto.ShareListDto;
 import com.assignment.clush.calender.mapper.CalendarMapper;
 import com.assignment.clush.calender.vo.Calendar;
@@ -33,7 +34,7 @@ public class CalendarService {
     }
 
     public Calendar insertCalendar(Calendar calendar) {
-        compareDate(calendar);
+        compareDate(calendar.getStartDate(), calendar.getEndDate());
 
         calendar.setCreatedDate(LocalDateTime.now());
         calendarMapper.insertCalendar(calendar);
@@ -41,13 +42,22 @@ public class CalendarService {
         return calendarMapper.getCalendarByNo(calendar.getNo());
     }
 
-    public Calendar updateCalendar(Calendar calendar) {
-        isExistedCalendar(calendar.getNo());
-        compareDate(calendar);
+    public Calendar updateCalendar(CalendarUpdateForm calendarUpdateForm) {
+        int no = calendarUpdateForm.getNo();
+        isExistedCalendar(no);
+        Calendar calendar = calendarMapper.getCalendarByNo(no);
+        CalendarUpdateForm prevCalendarUpdateForm = CalendarUpdateForm.builder()
+                .title(calendar.getTitle())
+                .content(calendar.getContent())
+                .startDate(calendar.getStartDate())
+                .endDate(calendar.getEndDate())
+                .repeats(calendar.getRepeats()).build();
+        if (prevCalendarUpdateForm.equals(calendarUpdateForm)) throw new RestClushException("수정된 부분이 존재하지 않습니다.");
+        compareDate(calendarUpdateForm.getStartDate(), calendarUpdateForm.getEndDate());
 
-        calendar.setModifiedDate(LocalDateTime.now());
-        calendarMapper.updateCalendar(calendar);
-        return calendarMapper.getCalendarByNo(calendar.getNo());
+        calendarUpdateForm.setModifiedDate(LocalDateTime.now());
+        calendarMapper.updateCalendar(calendarUpdateForm);
+        return calendarMapper.getCalendarByNo(no);
     }
 
     public void deleteCalendar(Integer calendarNo) {
@@ -80,15 +90,15 @@ public class CalendarService {
             LocalDate lastDate = firstDate.plusDays(6); // 이번 주 마지막 날
             List<CalendarByRangeDto> dtoList = calendarMapper.getShareOneWeekByIdAndRange(userId, firstDate, lastDate);
             if (dtoList.isEmpty()) {
-                throw new RestClushException("요청하신 범위에 해당하는 일정이 존재하지 않습니다.");
+                throw new RestClushException("이번 주에 해당하는 일정이 존재하지 않습니다.");
             }
             return dtoList;
         } else {
             LocalDate firstDate = LocalDate.now().withDayOfMonth(1); // 이번 달 첫째 날
             LocalDate lastDate = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()); // 이번 달 마지막 날
-            List<CalendarByRangeDto> dtoList = calendarMapper.getShareOneWeekByIdAndRange(userId, firstDate, lastDate);
+            List<CalendarByRangeDto> dtoList = calendarMapper.getShareOneMonthByIdAndRange(userId, firstDate, lastDate);
             if (dtoList.isEmpty()) {
-                throw new RestClushException("요청하신 범위에 해당하는 일정이 존재하지 않습니다.");
+                throw new RestClushException("이번 달에 해당하는 일정이 존재하지 않습니다.");
             }
             return dtoList;
         }
@@ -107,11 +117,11 @@ public class CalendarService {
 
     /**
      * calendar의 시작날짜와 만료날짜를 비교해서 시작날짜가 더 미래이면 에러를 반환한다.
-     * @param calendar 객체
+     * @param startDate 시작 날짜, endDate 만료 날짜
      * @return 에러
      */
-    private void compareDate(Calendar calendar) {
-        if (!DateCalculator.dateCalculate(calendar.getStartDate(), calendar.getEndDate())) {
+    private void compareDate(LocalDateTime startDate, LocalDateTime endDate) {
+        if (!DateCalculator.dateCalculate(startDate, endDate)) {
             throw new RestClushException("시작 날짜가 종료 날짜보다 이전이어야 합니다.");
         }
     }
