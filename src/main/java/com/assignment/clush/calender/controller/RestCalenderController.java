@@ -62,8 +62,8 @@ public class RestCalenderController {
 
     @Operation(summary = "일정 공유")
     @PostMapping("/share/{calendarNo}/{userId}")
-    public ResponseEntity<RestResponseDto<ShareListDto>> insertShareList(@Parameter(description = "일정 번호", example = "5") @PathVariable(value = "calendarNo", required = true) Integer calendarNo
-            , @Parameter(description = "유저 ID", example = "clush5") @PathVariable(value = "calendarNo", required = true) String userId) {
+    public ResponseEntity<RestResponseDto<ShareListDto>> insertShareList(@Parameter(description = "일정 번호", example = "5") @PathVariable("calendarNo") Integer calendarNo
+            , @Parameter(description = "유저 ID", example = "clush5") @PathVariable("userId") String userId) {
         return ResponseEntity.ok(RestResponseDto.success(calendarService.insertShare(calendarNo, userId), "정상적으로 해당 일정에 " + userId + "를 공유하였습니다."));
     }
 
