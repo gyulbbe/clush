@@ -29,25 +29,12 @@ public class ToDoService {
         return toDoMapper.getToDoByNo(toDoNo);
     }
 
-    /**
-     * 할 일을 추가한다.
-     * 할 일 객체를 받아서 insert후 할 일 객체를 반환한다.
-     * @param 할 일 객체
-     * @return 할 일 객체
-     */
     public ToDo insertToDo(ToDo toDo) {
         toDo.setCreatedDate(LocalDateTime.now());
         toDoMapper.insertToDo(toDo);
         return getToDoByNo(toDo.getNo());
     }
 
-    /**
-     * 할 일을 수정한다.
-     * 수정할 부분이 없으면 예외를 던진다.
-     * toDo객체를 받아서 update후 수정된 toDo객체를 반환한다.
-     * @param 할 일 객체
-     * @return 할 일 객체
-     */
     public ToDo updateToDo(ToDo toDo) {
         isNotExisted(toDo.getNo());
 
