@@ -61,6 +61,7 @@ public class CalendarService {
     }
 
     public void deleteCalendar(Integer calendarNo) {
+        isExistedCalendar(calendarNo);
         calendarMapper.deleteCalendar(calendarNo);
     }
 
