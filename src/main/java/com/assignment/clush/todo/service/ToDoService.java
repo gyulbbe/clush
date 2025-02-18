@@ -24,6 +24,8 @@ public class ToDoService {
     }
 
     public ToDo getToDoByNo(Integer toDoNo) {
+        isNotExisted(toDoNo);
+
         return toDoMapper.getToDoByNo(toDoNo);
     }
 
@@ -47,9 +49,7 @@ public class ToDoService {
      * @return 할 일 객체
      */
     public ToDo updateToDo(ToDo toDo) {
-        if (toDoMapper.countToDoByNo(toDo.getNo()) == 0) {
-            throw new RestClushException("존재하지 않는 할 일입니다.");
-        }
+        isNotExisted(toDo.getNo());
 
         ToDo prevToDo = getToDoByNo(toDo.getNo());
         if (prevToDo.equals(toDo)) {
@@ -58,18 +58,22 @@ public class ToDoService {
 
         toDo.setModifiedDate(LocalDateTime.now());
         toDoMapper.updateToDo(toDo);
-        return getToDoByNo(toDo.getNo());
+        return toDoMapper.getToDoByNo(toDo.getNo());
     }
 
     public void deleteToDo(Integer toDoNo) {
-        if (toDoMapper.countToDoByNo(toDoNo) == 0) {
-            throw new RestClushException("존재하지 않는 할 일입니다.");
-        }
+        isNotExisted(toDoNo);
 
         toDoMapper.deleteToDo(toDoNo);
     }
 
     public List<ToDoByConditionDto> getToDoListByCondition(ConditionDto conditionDto) {
         return toDoMapper.getToDoListByCondition(conditionDto);
+    }
+
+    private void isNotExisted(Integer toDoNo) {
+        if (toDoMapper.countToDoByNo(toDoNo) == 0) {
+            throw new RestClushException("존재하지 않는 할 일입니다.");
+        }
     }
 }
