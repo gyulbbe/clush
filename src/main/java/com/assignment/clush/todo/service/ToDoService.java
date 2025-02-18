@@ -32,7 +32,7 @@ public class ToDoService {
     public ToDo insertToDo(ToDo toDo) {
         toDo.setCreatedDate(LocalDateTime.now());
         toDoMapper.insertToDo(toDo);
-        return getToDoByNo(toDo.getNo());
+        return toDoMapper.getToDoByNo(toDo.getNo());
     }
 
     public ToDo updateToDo(ToDo toDo) {
