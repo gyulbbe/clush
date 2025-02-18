@@ -72,6 +72,7 @@ public class CalendarService {
     }
 
     public ShareListDto insertShare(Integer calendarNo, String userId) {
+        isExistedCalendar(calendarNo);
         if (calendarMapper.countShareByIdAndNo(calendarNo, userId) == 1) {
             throw new RestClushException("이미 공유중인 유저입니다.");
         }
